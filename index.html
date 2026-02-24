@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Corvinus Átlagkalkulátor</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#003058" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Átlagszámoló" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Apply saved theme before first paint to prevent flash
+    try {
+      const d = JSON.parse(localStorage.getItem("corvinusGpaData"));
+      if (d && d.theme === "dark") document.documentElement.classList.add("dark-mode-pending");
+    } catch(e) {}
+  </script>
+</head>
+<body>
+  <script>
+    // Transfer the class from <html> to <body> immediately
+    if (document.documentElement.classList.contains("dark-mode-pending")) {
+      document.body.classList.add("dark-mode");
+      document.documentElement.classList.remove("dark-mode-pending");
+    }
+  </script>
+  <!-- ================================================================== -->
+  <!-- Navbar                                                              -->
+  <!-- ================================================================== -->
+  <header class="app-header">
+    <div class="header-brand">
+      <svg class="header-logo" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
+        <rect width="32" height="32" rx="6" fill="#fff"/>
+        <text x="16" y="22" text-anchor="middle" font-size="18" font-weight="700" fill="#003058">C</text>
+      </svg>
+      <h1 data-i18n="appTitle">Corvinus Átlagkalkulátor</h1>
+    </div>
+
+    <!-- Hamburger toggle (mobile only) -->
+    <button id="nav-hamburger" class="nav-hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav id="nav-menu" class="nav-menu">
+      <a href="#calculator" class="nav-link nav-link--active" data-view="view-calculator" data-i18n="navCalculator">Átlagkalkulátor</a>
+      <a href="#calendar" class="nav-link" data-view="view-calendar" data-i18n="navCalendar">Naptár</a>
+      <a href="#whatif" class="nav-link" data-view="view-whatif" data-i18n="navWhatIf">Cél-kalkulátor</a>
+      <div class="nav-separator"></div>
+      <button id="theme-toggle" class="btn-theme" aria-label="Toggle theme">
+        <span class="theme-icon">&#9790;</span>
+      </button>
+      <div id="lang-toggle" class="lang-switch" role="switch" aria-label="Toggle language" tabindex="0">
+        <span class="lang-switch-label">HU</span>
+        <div class="lang-switch-track">
+          <div class="lang-switch-knob"></div>
+        </div>
+        <span class="lang-switch-label">EN</span>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ================================================================== -->
+  <!-- View: GPA Calculator                                                -->
+  <!-- ================================================================== -->
+  <div id="view-calculator" class="app-view active">
+    <div class="app-layout">
+      <!-- Main content: Semester Cards -->
+      <main class="app-main">
+        <div id="semesters-container"></div>
+
+        <div class="action-bar">
+          <button id="btn-add-semester" class="btn btn-primary" data-i18n="addSemester">
+            Új félév hozzáadása
+          </button>
+          <button id="btn-reset" class="btn btn-danger" data-i18n="resetAll">
+            Adatok törlése
+          </button>
+        </div>
+      </main>
+
+      <!-- Results Dashboard (sidebar on desktop, sticky footer on mobile) -->
+      <div class="sidebar-area">
+        <button id="sidebar-toggle" class="sidebar-toggle" aria-expanded="true">
+          <span class="sidebar-toggle-icon">&#9654;</span>
+          <span class="sidebar-toggle-label" data-i18n="toggleSidebar">Eredmények</span>
+        </button>
+        <aside id="results-container" class="results-sidebar"></aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- View: Calendar / Timeline                                           -->
+  <!-- ================================================================== -->
+  <div id="view-calendar" class="app-view"></div>
+
+  <!-- ================================================================== -->
+  <!-- View: What-If Target Calculator                                     -->
+  <!-- ================================================================== -->
+  <div id="view-whatif" class="app-view"></div>
+
+  <!-- ================================================================== -->
+  <!-- Custom confirm modal                                                -->
+  <!-- ================================================================== -->
+  <div id="confirm-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <p class="modal-message" id="confirm-message"></p>
+      <div class="modal-actions">
+        <button id="confirm-cancel" class="btn btn-secondary"></button>
+        <button id="confirm-ok" class="btn btn-danger"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- Info modal                                                          -->
+  <!-- ================================================================== -->
+  <div id="info-modal" class="modal-overlay">
+    <div class="modal-dialog modal-dialog--info">
+      <h3 class="modal-info-title" id="info-title"></h3>
+      <p class="modal-message" id="info-message"></p>
+      <div class="modal-actions">
+        <button id="info-close" class="btn btn-primary"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- PWA Install Banner                                                  -->
+  <!-- ================================================================== -->
+  <div id="install-banner" class="install-banner" hidden>
+    <div class="install-banner-content">
+      <span class="install-banner-icon">&#128161;</span>
+      <p class="install-banner-text" id="install-banner-text"></p>
+      <div class="install-banner-actions">
+        <button id="install-banner-action" class="btn btn-primary btn-sm" hidden></button>
+        <button id="install-banner-dismiss" class="install-banner-close" aria-label="Close">&times;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- Scripts (ES modules)                                                -->
+  <!-- ================================================================== -->
+  <script type="module" src="app.js"></script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js")
+          .then((reg) => console.log("SW registered:", reg.scope))
+          .catch((err) => console.warn("SW registration failed:", err));
+      });
+    }
+  </script>
+</body>
+</html>
