@@ -611,16 +611,14 @@ body.dark-mode .btn-theme {
 /* Semester body – animated collapse */
 .semester-body {
   overflow: hidden;
+  max-height: 2000px;
   opacity: 1;
-  transform: scaleY(1);
-  transform-origin: top;
-  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: opacity, transform;
+  transition: max-height 0.4s ease, opacity 0.25s ease;
 }
 
 .semester-body--collapsed {
+  max-height: 0;
   opacity: 0;
-  transform: scaleY(0);
   pointer-events: none;
 }
 
